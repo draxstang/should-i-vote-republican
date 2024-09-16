@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<head>
+  <title>Should I vote for a Republican, ever?</title>
+  <style>
+    @media (prefers-color-scheme: dark) { 
+      body {
+        background-color: black;
+        color: white;
+        color-scheme: dark;
+      }
+
+      .modal {
+        background: black;
+      }
+
+      #dvFooter {
+        background-color: black;
+      }
+    }
+
+    @media (prefers-color-scheme: light) { 
+      body {
+        background-color: white;
+        color: black;
+        color-scheme: light;
+      }
+
+      .modal {
+        background: white;
+      }
+
+      #dvFooter {
+        background-color: white;
+      }
+    }
+
+    body {
+      align-items: center;
+      max-width: 40rem;
+      margin: 0px auto 4rem auto;
+      font-size: 12pt;
+    }
+
+    br {
+      margin-bottom: 1rem;
+    }
+
+    button {
+      min-width: 10rem;
+      min-height: 2rem;
+      font-size: larger;
+      cursor: pointer;
+    }
+
+    button.close {
+      min-width: 1rem;
+      float: right;
+    }
+
+    ol li label {
+      font-weight: bold;
+    }
+
+    ol li p {
+      margin-top: 0.1rem;
+    }
+
+    #dvQuestion, #dvEnd {
+      display: none;
+    }
+
+    #dvFooter {
+      position: fixed;
+      bottom: 0;
+      left: 1rem;
+      right: 1rem;
+    }
+
+    #dvPrevious {
+      display: none;
+      margin-top: 3rem;
+    }
+
+    #dvOverlay {
+      position: fixed;
+      display: none;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    #btnNext {
+      float: right;
+      display: none;
+    }
+
+    .modal {
+      position: absolute;
+      display: none;
+      max-width: 30rem;
+      left: 0;
+      right: 0;
+      top: 2rem;
+      margin: auto;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      border: 2px solid #777;
+    }
+
+    .modal h2 {
+      margin-top: 0;
+    }
+
+    .shown {
+      display: block !important;
+    }
+  </style>
+  <script type="text/javascript">
+    let answers = [],
+      prompts = [{
+        q: "Are you a billionaire?",
+        y: `Wow. I mean you're probably lying, but wow. Why haven't you used your enormous wealth to fix all this shit? Why kind of psychopath sees our homeless problem and thinks: "I could solve this, but I won't."<br />
+        Even if you are a billionaire, you're only useful to fascist leaders until you're not. Then you'll be "<a href="https://www.newsweek.com/full-list-russians-fall-windows-putin-ukraine-war-1781790" target="_blank">falling out a window</a>", like all of the former allies of Putin.<br />
+        But hey, you've got a private jet. Maybe you'll make a clean escape before things kick off. It'll probably still get shot down.`,
+        n: `You're not a billionaire? Yeah, most of us aren't. But that means Republicans don't care about you, because you aren't paying them off.<br />
+        Ever since president <a href="https://en.wikipedia.org/wiki/Reagan_tax_cuts" target="_blank">Reagan</a>, Republicans have been giving the richest <a href="https://www.nytimes.com/2021/06/10/opinion/elon-musk-propublica-taxes.html" target="_blank">people</a> and <a href="https://www.marketingscoop.com/consumer/does-amazon-pay-taxes/" target="_blank">corporations</a> tax breaks and making the rest of us pay more. If you give Trump <a href="https://www.commondreams.org/news/trumps-quid-pro-quo-2669158958" target="_blank">$1 billion</a>, he'll do whatever you want. If you can't, he doesn't care about you.`
+      },{
+        q: "Are you a woman?",
+        y: `Republicans hate women (yes, even the women Republicans). In Republican controlled states, women are <a href="https://www.newyorker.com/magazine/2024/01/15/abortion-high-risk-pregnancy-yeni-glick" target="_blank">dying</a> because doctors are afraid to provide lifesaving care to them. Children are being forced to <a href="https://time.com/6198062/rape-victim-10-abortion-indiana-ohio/" target="_blank">travel</a> or give birth to their rapist's babies. Your life, and the life of every woman, depends on Republicans never having power.`,
+        n: `In Republican controlled states, women are <a href="https://www.newyorker.com/magazine/2024/01/15/abortion-high-risk-pregnancy-yeni-glick" target="_blank">dying</a> because doctors are afraid to provide lifesaving care to them. Children are being forced to <a href="https://time.com/6198062/rape-victim-10-abortion-indiana-ohio/" target="_blank">travel</a> or give birth to their rapist's babies. Your life, and the life of every woman, depends on Republicans never having power. Even if you're a man, are you prepared to lose the women in your life to this nonsense? The elected Republicans can afford to send their spouses, children, friends, and mistresses to another country to get reproductive care. You probably can't, and you'll be arrested if you get caught doing it.`
+      },{
+        q: "Are you white?",
+        y: `Let's be real, <a href="https://www.pbs.org/newshour/science/white-supremacists-respond-genetics-say-theyre-not-white" target="_blank">nobody</a> is 100% white. I (the creator of this) recently found out that I'm 1/32 Cherokee (a big surprise). The moment you are inconvenient, this will be an excuse to discriminate against you.`,
+        n: `If you're not 100% white, the Republicans don't care about you. If you're black or brown, they really don't care about you if you're <a href="https://en.wikipedia.org/wiki/List_of_unarmed_African_Americans_killed_by_law_enforcement_officers_in_the_United_States" target="_blank">murdered by a cop</a>. For the rest of us, they seem to love the "<a href="https://en.wikipedia.org/wiki/One-drop_rule" target="_blank">one drop rule</a>". It'll be used as an excuse to discriminate or ignore us whenever they want.`
+      },{
+        q: "Do you have or want kids?",
+        y: `Republicans are attempting to <a href="https://www.ed.gov/news/press-releases/fact-sheet-house-republican-proposals-hurt-children-students-and-borrowers-and-undermine-education" target="_blank">destroy education</a>. All of their kids go to private schools and they don't care about anybody who can't afford that. They don't want you to have <a href="https://www.plannedparenthoodaction.org/issues/birth-control/religious-refusal-and-reproductive-health" target="_blank">birth control</a> for family planning, help you with <a href="https://www.cnn.com/2024/06/13/politics/senate-ivf-bill-vote/index.html" target="_blank">IVF</a>, or even make sure your <a href="https://apnews.com/article/states-rejecting-federal-funds-summer-ebt-8a1e88ad77465652f9de67fda3af8a2d" target="_blank">kids don't starve</a>. And let's not forget about the school shootings that happen twice a week.`,
+        n: `Republicans don't want you to have access to <a href="https://www.nbcnews.com/politics/congress/senate-republicans-block-bill-protect-americans-access-contraception-rcna155448" target="_blank">birth control</a>. They don't want your <a href="https://www.plannedparenthoodaction.org/issues/birth-control/religious-refusal-and-reproductive-health" target="_blank">doctor</a> to prescribe it, your <a href="https://www.latimes.com/business/story/2024-06-25/this-huge-insurer-got-caught-flouting-a-law-protecting-contraceptive-access-but-its-fine-is-a-joke" target="_blank">insurance company</a> to approve it, or a <a href="https://www.usatoday.com/story/money/retail/2022/07/27/pharmacist-wont-fill-birth-control-because-faith/10154078002/" target="_blank">pharmacist</a> to give it to you. Many of them are actively trying to make it illegal to obtain.`
+      },{
+        q: "Do you like animals?",
+        y: `Republicans seem to hate animals. From destroying <a href="https://www.pbs.org/newshour/science/wildlife-agencies-to-cancel-trump-era-endangered-species-rules" target="_blank">wildlife</a> and <a href="https://www.nytimes.com/2024/04/26/us/politics/kristi-noem-dog-killing.html" target="_blank">murdering their own pets</a>, they are on a mission to hurt every animal. If you love animals, don't vote for them.`,
+        n: `Only people without souls hate all animals, and the animals can tell. From destroying <a href="https://www.pbs.org/newshour/science/wildlife-agencies-to-cancel-trump-era-endangered-species-rules" target="_blank">wildlife</a> and <a href="https://www.nytimes.com/2024/04/26/us/politics/kristi-noem-dog-killing.html" target="_blank">murdering their own pets</a>, they are on a mission to hurt every animal.`
+      },{
+        q: "Would you like to retire?",
+        y: `Republicans have <a href="https://www.reuters.com/markets/us/if-trump-wins-he-plans-free-wall-street-burdensome-regulations-2024-04-12/" target="_blank">eliminated safeties</a> in financial markets, prevented the <a href="https://www.newsweek.com/three-quarters-republicans-oppose-raising-minimum-wage-poll-1576579" target="_blank">minimum wage</a> from going up, and are going after <a href="https://www.newsweek.com/republicans-trillion-cut-social-security-1952649" target="_blank">social security</a>. All while allowing executives to take more and more of the wealth that you create. They don't want you to retire, they want you to die at your job.`,
+        n: `That's good, because the Republican plan is to have you die at your job. They have <a href="https://www.reuters.com/markets/us/if-trump-wins-he-plans-free-wall-street-burdensome-regulations-2024-04-12/" target="_blank">eliminated safeties</a> in financial markets, blocked <a href="https://www.newsweek.com/three-quarters-republicans-oppose-raising-minimum-wage-poll-1576579" target="_blank">minimum wage</a> increases, and are going after <a href="https://www.newsweek.com/republicans-trillion-cut-social-security-1952649" target="_blank">social security</a>. All while allowing executives to take home more and more of the wealth that you create.`
+      },{
+        q: "Do you have any health problems?",
+        y: `Republicans don't want you to have good healthcare. They consistently block universal healthcare, and try to rollback protections from <a href="https://www.npr.org/sections/health-shots/2023/07/24/1189332308/house-republicans-choice-act-roll-back-obamacare-protections" target="_blank">existing laws</a> that we have. Bad healthcare earns them money! And they already have the <a href="https://sgp.fas.org/crs/misc/R43194.pdf" target="_blank">best insurance</a>, provided by us taxpayers. Medication prices are <a href="https://aspe.hhs.gov/reports/prescription-drug-price-increases" target="_blank">skyrocketing</a>, health insurance <a href="https://www.usnews.com/news/health-news/articles/2023-10-18/health-insurance-premiums-rise-7-in-u-s-survey-shows" target="_blank">costs more</a> and <a href="https://healthjournalism.org/blog/2023/12/report-shows-health-insurance-coverage-is-inadequate-for-many-americans/" target="_blank">covers less</a>, privately owned hospitals are <a href="https://www.nytimes.com/interactive/2021/08/22/upshot/hospital-prices.html" target="_blank">price gouging</a>, the list goes on. Anybody opposed to universal healthcare wants to make a profit on your lack of health.`,
+        n: `You don't have any, <i>yet</i>. All it takes is one bad driver or one company poisoning your environment to give you health problems for life. The Republican plan for healthcare is for you to get a private insurance policy that <a href="https://www.usnews.com/news/health-news/articles/2023-10-18/health-insurance-premiums-rise-7-in-u-s-survey-shows" target="_blank">costs a lot</a> and <a href="https://healthjournalism.org/blog/2023/12/report-shows-health-insurance-coverage-is-inadequate-for-many-americans/" target="_blank">covers nothing</a> while your medication costs <a href="https://aspe.hhs.gov/reports/prescription-drug-price-increases" target="_blank">skyrocket</a>. Anybody opposed to universal healthcare wants to make a profit on your lack of health.`
+      },{
+        q: "Do you believe in a 1st amendment right to free speech?",
+        y: `Republicans are <a href="https://www.cnn.com/2024/04/17/media/right-wing-book-bans-accelerating/index.html" target="_blank">banning books</a>, <a href="https://firstamendmentwatch.org/deep-dive/states-rush-to-pass-anti-protestor-laws/" target="_blank">restricting protests</a>, and even want to know who is <a href="https://www.newsweek.com/states-porn-age-verification-free-speech-1903108" target="_blank">looking at porn</a>. For the party of people who constantly complain about having to be "<a href="https://prospect.org/power/republican-candidates-obsessed-political-correctness/" target="_blank">politically correct</a>", they sure do love to force people to use specific words and phrases. What snowflakes, right?`,
+        n: `I mean, you're just trolling yourself at this point. Republicans are <a href="https://www.cnn.com/2024/04/17/media/right-wing-book-bans-accelerating/index.html" target="_blank">banning books</a>, <a href="https://firstamendmentwatch.org/deep-dive/states-rush-to-pass-anti-protestor-laws/" target="_blank">restricting protests</a>, and even want to know who is <a href="https://www.newsweek.com/states-porn-age-verification-free-speech-1903108" target="_blank">looking at porn</a>. For the party of people who constantly complain about having to be "<a href="https://prospect.org/power/republican-candidates-obsessed-political-correctness/" target="_blank">politically correct</a>", they sure do love to force people to use specific words and phrases. What snowflakes, right?`
+      },{
+        q: "Do you believe in a 1st amendment right to freedom of religion?",
+        y: `Once again, <a href="https://slate.com/news-and-politics/2022/04/how-republicans-recast-christian-indoctrination-as-religious-freedom.html" target="_blank">Republicans don't</a>. They want to tell you that this is a "Christian nation", even though the US constitution <a href="https://en.wikipedia.org/wiki/First_Amendment_to_the_United_States_Constitution" target="_blank">explicitly says it's not</a>. And they sure don't sem to follow the new testament's teachings. Republicans want to force an agenda and use religion as a tool without actually following it.`,
+        n: `Ah, hopefully you're in the specific denomination of Christianity that wins the fight. Republicans love to say this is a "<a href="https://slate.com/news-and-politics/2022/04/how-republicans-recast-christian-indoctrination-as-religious-freedom.html" target="_blank">Christian nation</a>", but never seem to identify which specific group of Christians they're talking about. There are 12 different main denominations, and each of those has several sub-groups, each with different ideas and rules. Don't doubt for a second there won't be a series of battles to decide the real winner after all of us "non-believers" are wiped out.`
+      },{
+        q: `Are you 100% completely heterosexual (that means "straight")?`,
+        y: `So... you're clearly lying to yourself, but let's pretend that you aren't for now. Republicans are the <a href="https://slate.com/news-and-politics/2022/04/from-hastert-to-gaetz-lets-talk-about-republicans-and-sex-crimes.html" target="_blank">kinkiest self-hating weirdos</a> on the planet (ask any trans sex worker in DC). Nobody is 100% straight and they know this. It's just another way to divide people into smaller groups that they can attack at will.`,
+        n: `Republicans are the <a href="https://slate.com/news-and-politics/2022/04/from-hastert-to-gaetz-lets-talk-about-republicans-and-sex-crimes.html" target="_blank">kinkiest self-hating weirdos</a> on the face of this planet. But they love to attack anybody that they think isn't 100% straight. If you're a known member of the LGBTQIA+ community, you are in danger around Republicans. If you are poly, enjoy swinging, or watch lesbian porn you're probably in danger too.`
+      },{
+        q: "Are you a veteran?",
+        y: `Republicans love using veterans as props, but wow do they hate you after all you've sacrificed. They won't provide <a href="https://www.newsweek.com/why-veteran-health-care-bill-was-smacked-down-republicans-1729230" target="_blank">good healthcare</a>. They won't <a href="https://www.nytimes.com/interactive/2019/09/10/us/men-military-sexual-assault.html" target="_blank">protect you</a> from bad actors while you're service. And even after you die they'll use your grave as a <a href="https://www.usatoday.com/story/news/politics/elections/2024/08/28/trump-arlington-cemetery-veterans/74980080007/" target="_blank">photo opportunity</a> on a campaign ad. I'm sorry, you deserve better.`,
+        n: `That's good, cause Republicans sure seem to abuse veterans. Veterans get <a href="https://www.newsweek.com/why-veteran-health-care-bill-was-smacked-down-republicans-1729230" target="_blank">bad healthcare</a>, <a href="https://www.nytimes.com/interactive/2019/09/10/us/men-military-sexual-assault.html" target="_blank">abused</a> while in the service, and then their graves are used for a <a href="https://www.usatoday.com/story/news/politics/elections/2024/08/28/trump-arlington-cemetery-veterans/74980080007/" target="_blank">photo opportunity</a> after they've been killed. How fucked up is that?`
+      },{
+        q: "Do you like having a planet to live on?",
+        y: `Yeah, me too. Unfortunately Republicans are trying to <a href="https://www.pbs.org/newshour/politics/house-republicans-pass-energy-bill-to-roll-back-regulation-of-fossil-fuel-production" target="_blank">destroy everything</a> to make a little more money. The earth could be unrecognizable in 50 years due to climate change and large corporations poisoning the environment.`,
+        n: `I have news for you: we're not gonna make it into a space colony any time soon. Billionaires are idiots who think they can escape all the problems of earth by launching a rocket. Bezos can't let his employees <a href="https://www.forbes.com/sites/katherinehamilton/2023/05/24/delivery-drivers-sue-amazon-for-being-forced-to-pee-in-bottles/" target="_blank">pee in a bathroom</a> while being profitable and Musk can't build a self-driving car that <a href="https://www.theverge.com/2024/4/26/24141361/tesla-autopilot-fsd-nhtsa-investigation-report-crash-death" target="_blank">doesn't crash</a>. Republicans want to <a href="https://www.pbs.org/newshour/politics/house-republicans-pass-energy-bill-to-roll-back-regulation-of-fossil-fuel-production" target="_blank">destroy this planet</a> to earn a little more money before they die, and they don't care if there's anything left for the people being born this year.`
+      },{
+        q: "Do you want to live under a dictatorship or oligarchy or some other fascistic government?",
+        y: `I assure you that you in fact, don't. Trump is <a href="https://www.nbcnews.com/politics/donald-trump/trump-floats-imprisoning-political-opponents-rcna155543" target="_blank">openly pointing out</a> who he will lock up or kill if he gains the power to do so. What if you beat him in a golf game? Or complain that his diaper smells? You'll disappear or be made an example out of just like the rest of us "undesirables".`,
+        n: `Nobody should. But that's the <a href="https://www.nbcnews.com/politics/donald-trump/trump-floats-imprisoning-political-opponents-rcna155543" target="_blank">Republican plan</a>. Trump is openly calling for <a href="https://www.theatlantic.com/ideas/archive/2024/05/trumps-legal-corrupt-offer-oil-executives/678333/" target="_blank">billionaires</a> to give him money so he can put them in <a href="https://www.forbes.com/sites/mollybohannon/2024/08/19/trump-suggests-he-would-give-elon-musk-a-cabinet-position-in-second-term/" target="_blank">positions of power</a>. The world is already fucked because billionaires can buy politicians, imagine how much worse it will be if they're the entire government.`
+      },{
+        q: "Do you enjoy your privacy?",
+        y: `Republicans <a href="https://www.aclu.org/press-releases/congress-passing-bill-that-massively-expands-the-governments-power-to-spy-on-americans-without-a-warrant" target="_blank">want to spy on you</a>, constantly. They want to know what websites you're going to, what messages you're writing, who your friends are, where you travel, everything. <br />
+        Why? Maybe it's their weird fetish. Or maybe they just want to lock us all up to feed the <a href="https://www.motherjones.com/politics/2020/10/private-prisons-have-spent-more-on-this-election-than-any-other-in-history/" target="_blank">privatized prison system</a> they're invested in.`,
+        n: `Unless you're out masturbating in public, this is a lie. Republicans want to know <a href="https://www.aclu.org/press-releases/congress-passing-bill-that-massively-expands-the-governments-power-to-spy-on-americans-without-a-warrant" target="_blank">everything about you</a>. This isn't hyperbole, it's actually happening and they're even trying to steal <a href="https://apnews.com/article/abortion-privacy-records-texas-lawsuit-9574df658a3336ab8ad28c31a2f79821" target="_blank">private medical records</a> to do so.<br />
+        Why? Maybe it's their weird fetish. Or maybe they just want to lock us all up to feed the <a href="https://www.motherjones.com/politics/2020/10/private-prisons-have-spent-more-on-this-election-than-any-other-in-history/" target="_blank">privatized prison system</a> they're invested in.`
+      },{
+        q: "Do you want to be able to vote ever again?",
+        y: `We should all want to vote, and vote for the most progressive candidates we can down the ballot to make the country (and the world) better. But if Trump wins, he's openly stated that <a href="https://www.nytimes.com/2024/07/30/us/politics/trump-christians-vote-ingraham.html" target="_blank">you'll never vote again because the elections going forward will be "fixed so good"</a>. We call that a dictatorship, not a democracy.`,
+        n: `Everybody thinks they're powerless today. But they also think if they could time travel and make one small change to history, the impact of that could be enormous. You should vote, and it should never be for a Republican, because they want to <a href="https://www.nytimes.com/2024/07/30/us/politics/trump-christians-vote-ingraham.html" target="_blank">take your right to vote away</a>.`
+      }];
+
+    function init(reset = false) {
+      if (reset) {
+        answers = []
+        document.getElementById('dvEnd').style.display = "none";
+        document.getElementById('dvPrevious').style.display = "none";
+        document.getElementById('dvQuestion').style.display = "none";
+        document.getElementById('dvInstructions').style.display = "block";
+        save()
+      } else if (localStorage["answers"]) {
+        try {
+          answers = JSON.parse(localStorage["answers"]);
+        } catch (ex) {
+          answers = [];
+        }
+      }
+
+      if (answers.length) {
+        renderQ(answers.length);
+      }
+    }
+
+    function renderQ(num = 0) {
+      document.getElementById('dvInstructions').style.display = "none";
+
+      if (num >= prompts.length) {
+        renderEnd();
+        return;
+      };
+
+      let prompt = prompts[num];
+      let div = document.getElementById('dvQuestion');
+      let { question, relevantText, btnNext, btnYes, btnNo } = div.children;
+      relevantText.innerText = "";
+      question.innerText = prompt.q;
+      btnNext.style.display = "none";
+      btnYes.disabled = false;
+      btnNo.disabled = false;
+      div.style.display = "block";
+
+      renderPrev();
+    }
+
+    function renderEnd() {
+      document.getElementById('dvQuestion').style.display = "none";
+      document.getElementById('dvEnd').style.display = "block";
+      renderPrev();
+    }
+
+    function renderPrev() {
+      let div = document.getElementById('dvPrevious');
+      if (!answers.length) {
+        div.style.display = "none";
+        return;
+      }
+
+      div.style.display = "block";
+      let prev = [];
+      for (let i = 0; i < answers.length; i++) {
+        let a = answers[i];
+        let li = document.createElement('li');
+        let q = document.createElement('label');
+        let p = document.createElement('p');
+        p.innerHTML = prompts[i][a];
+        q.innerText = `${prompts[i].q} ${a == 'y' ? 'Yes' : 'No'}`;
+        li.appendChild(q);
+        li.appendChild(p);
+        prev.push(li);
+      }
+
+      div.children.lstPrevious.replaceChildren(...prev);
+    }
+
+    function answer(val) {
+      let prompt = prompts[answers.length];
+      let div = document.getElementById('dvQuestion');
+      let { relevantText, btnNext, btnYes, btnNo } = div.children;
+      relevantText.innerHTML = prompt[val];
+      btnNext.style.display = "block";
+      btnYes.disabled = true;
+      btnNo.disabled = true;
+      answers.push(val);
+      save();
+    }
+
+    function save() {
+      localStorage["answers"] = JSON.stringify(answers);
+    }
+
+    function showModal(modalId) {
+      document.getElementById('dvOverlay').classList.add("shown");
+      document.getElementById(modalId).classList.add("shown");
+    }
+
+    function closeModal() {
+      let modals = document.getElementsByClassName('shown');
+      while (modals[0]) {
+        modals[0].classList.remove("shown");
+      }
+    }
+  </script>
+</head>
+<body onload="init()">
+  <div id="dvOverlay"></div>
+  <h2>Should I vote for a Republican in 2024 or ever?</h2>
+  <div id="dvEnd">
+    <h3>Completed</h3>
+    <p>You've reached the end of the flow chart and maybe learned something.</p>
+    <p>Please make a plan to vote and make sure you don't vote for any Republicans on the ballot. Everybody's well being, even the Republicans, depends on it.</p>
+    <p>If you'd like to start over or clear your data, please click the button below.</p>
+    <button type="button" onclick="init(true)">Clear Data and Restart</button>
+  </div>
+  <div id="dvInstructions">
+    <p>This is a simple interactive flow chart to help you decide if you should vote Republican in 2024, or ever.</p>
+    <p>It will assume that you are only thinking about your own well being, and not that of friends, relatives, or strangers.</p>
+    <p>I will attempt to cite sources. However, the internet is always changing with paywalls and articles disappearing.</p>
+    <button onclick="renderQ()">Let's go</button>
+  </div>
+  <div id="dvPrivacy" class="modal">
+    <button type="button" class="close" title="Close privacy policy modal" onclick="closeModal()">❌</button>
+    <h2>Privacy Policy</h2>
+    <p>I have none of your data. I don't want to know anything about you, to be honest.</p>
+    <p>Your web browser will remember what you've entered here unless you clear local data or click the "Clear Data and Restart" button below or in the "Previously answered" section.</p>
+    <button type="button" onclick="init(true)">Clear Data and Restart</button>
+  </div>
+  <div id="dvAbout" class="modal">
+    <button type="button" class="close" title="Close about modal" onclick="closeModal()">❌</button>
+    <h2>About this thing</h2>
+    <p>
+      This is meant to be a small art piece to help illustrate that <strong>nobody should ever vote for a Republican</strong>. 
+      The Republican party is one of fascism and has been for decades. But they constantly lie and trick people into thinking they have your back.
+    </p>
+    <p>
+      If anything on this page upsets you, I hope it's because you realize you've been fooled by Republicans. But that's ok, you are allowed to learn, change, and be angry at them. 
+      If you feel violent urges towards me because of the words here, you are part of the problem and should seek help.
+    </p>
+  </div>
+  <div id="dvQuestion" class="question">
+    <h3 id="question">Question text goes here</h3>
+    <button type="button" id="btnYes" onclick="answer('y')">Yes</button>
+    <button type="button" id="btnNo" onclick="answer('n')">No</button>
+    <button type="button" id="btnNext" onclick="renderQ(answers.length)">Next</button>
+    <p id="relevantText"></p>
+  </div>
+  <div id="dvPrevious">
+    <h4>Previously answered questions</h4>
+    <ol id="lstPrevious"></ol>
+    <button type="button" onclick="init(true)">Clear Data and Restart</button>
+  </div>
+  <div id="dvFooter">
+    <button type="button" onclick="showModal('dvAbout')">About</button>
+    <button type="button" onclick="showModal('dvPrivacy')">Privacy</button>
+  </div>
+</body>
